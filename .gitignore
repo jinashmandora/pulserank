@@ -39,5 +39,18 @@ bin/
 ### VS Code ###
 .vscode/
 
-### Mac OS ###
+# OS
 .DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Environment
+.env.local
+
+# Docker
+docker-data/
+
+# Misc
+*.class
