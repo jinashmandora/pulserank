@@ -8,12 +8,21 @@ dependencyResolutionManagement {
     }
 }
 
+pluginManagement {
+    includeBuild("build-logic")
+
+    repositories {
+        gradlePluginPortal()
+        mavenCentral()
+    }
+}
+
 include(
-    "common",
-    "event-model",
-    "product-service",
-    "event-service",
-    "query-service",
-    "event-generator",
-    "flink-job"
+    "platform:common",
+    "platform:event-model",
+    "services:product-service",
+    "services:event-service",
+    "services:query-service",
+    "services:event-generator",
+    "streaming:flink-job"
 )
