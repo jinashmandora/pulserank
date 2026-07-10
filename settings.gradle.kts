@@ -1,28 +1,26 @@
 rootProject.name = "pulserank"
 
-enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
-
-dependencyResolutionManagement {
-    repositories {
-        mavenCentral()
-    }
-}
-
 pluginManagement {
-    includeBuild("build-logic")
-
     repositories {
         gradlePluginPortal()
         mavenCentral()
     }
 }
 
+
+dependencyResolutionManagement {
+    repositoriesMode.set(
+        RepositoriesMode.FAIL_ON_PROJECT_REPOS
+    )
+
+    repositories {
+        mavenCentral()
+    }
+}
+
 include(
-    "platform:common",
-    "platform:event-model",
-    "services:product-service",
+    "common:event-schema",
     "services:event-service",
     "services:query-service",
-    "services:event-generator",
-    "streaming:flink-job"
+    "streaming:ranking-job"
 )
