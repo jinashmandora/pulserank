@@ -1,0 +1,40 @@
+{
+  "type": "record",
+  "namespace": "com.pulserank.schema.event",
+  "name": "ProductIntersectionEvent",
+  "fields": [
+    {
+      "name": "eventId",
+      "type": "string"
+    },
+    {
+      "name": "userId",
+      "type": "string"
+    },
+    {
+      "name": "productId",
+      "type": "long"
+    },
+    {
+      "name": "eventType",
+      "type": {
+        "type": "enum",
+        "name": "EventType",
+        "symbols": [
+          "VIEW",
+          "CLICK",
+          "WISHLIST",
+          "CART",
+          "PURCHASE"
+        ]
+      }
+    },
+    {
+      "name": "eventTime",
+      "type": {
+        "type": "long",
+        "logicalType": "timestamp-millis"
+      }
+    }
+  ]
+}

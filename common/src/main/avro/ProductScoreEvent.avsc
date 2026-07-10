@@ -1,0 +1,64 @@
+{
+  "type": "record",
+  "namespace": "com.pulserank.schema.event",
+  "name": "ProductScoreEvent",
+  "fields": [
+    {
+      "name": "eventId",
+      "type": "string"
+    },
+    {
+      "name": "productId",
+      "type": "long"
+    },
+    {
+      "name": "score",
+      "type": "int"
+    },
+    {
+      "name": "eventTime",
+      "type": {
+        "type": "long",
+        "logicalType": "timestamp-millis"
+      }
+    },
+    {
+      "name": "productDetails",
+      "type": [
+        "null",
+        {
+          "type": "record",
+          "name": "ProductDetails",
+          "fields": [
+            {
+              "name": "categoryId",
+              "type": "long"
+            },
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "brand",
+              "type": "string"
+            },
+            {
+              "name": "price",
+              "type": {
+                "type": "bytes",
+                "logicalType": "decimal",
+                "precision": 19,
+                "scale": 2
+              }
+            },
+            {
+              "name": "currency",
+              "type": "string"
+            }
+          ]
+        }
+      ],
+      "default": null
+    }
+  ]
+}
