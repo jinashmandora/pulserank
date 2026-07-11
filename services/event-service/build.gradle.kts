@@ -2,7 +2,6 @@ plugins {
     alias(libs.plugins.spring.boot)
     alias(libs.plugins.dependency.management)
     java
-    application
 }
 
 java {
@@ -13,9 +12,12 @@ java {
 
 dependencies {
 
+    implementation(project(":common:event-schema"))
+
     implementation(libs.spring.boot.starter.webmvc)
     implementation(libs.spring.boot.starter.validation)
     implementation(libs.spring.boot.starter.kafka)
+    implementation(libs.apicurio.registry.avro)
 
     testImplementation(libs.spring.boot.starter.webmvc.test)
     testImplementation(libs.spring.boot.starter.kafka.test)

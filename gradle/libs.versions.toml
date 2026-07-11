@@ -1,5 +1,9 @@
 [versions]
+
 spring-boot = "4.1.0"
+avro = "1.12.1"
+avro-gradle-plugin = "0.1.1"
+apicurio = "3.2.5"
 
 [libraries]
 
@@ -10,7 +14,12 @@ spring-boot-starter-kafka = { module = "org.springframework.boot:spring-boot-sta
 spring-boot-starter-webmvc-test = { module = "org.springframework.boot:spring-boot-starter-webmvc-test" }
 spring-boot-starter-kafka-test = { module = "org.springframework.boot:spring-boot-starter-kafka-test" }
 
+# Avro
+avro = { module = "org.apache.avro:avro", version.ref = "avro" }
+apicurio-registry-avro = { module = "io.apicurio:apicurio-registry-avro-serde-kafka", version.ref = "apicurio" }
+
 [plugins]
-# Spring
+
 spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }
 dependency-management = { id = "io.spring.dependency-management", version = "1.1.7" }
+avro = { id = "eu.eventloopsoftware.avro-gradle-plugin", version.ref = "avro-gradle-plugin" }
