@@ -9,12 +9,11 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/common" />
-            <option value="$PROJECT_DIR$/common/event-schema" />
             <option value="$PROJECT_DIR$/services" />
             <option value="$PROJECT_DIR$/services/event-service" />
-            <option value="$PROJECT_DIR$/services/query-service" />
+            <option value="$PROJECT_DIR$/services/product-catalog-service" />
             <option value="$PROJECT_DIR$/streaming" />
-            <option value="$PROJECT_DIR$/streaming/ranking-job" />
+            <option value="$PROJECT_DIR$/streaming/product-ranking-job" />
           </set>
         </option>
       </GradleProjectSettings>

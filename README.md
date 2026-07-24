@@ -2,7 +2,7 @@
 
 Real-time Trending Products Platform built with
 
-- Java 25
+- Java 21
 - Spring Boot
 - Apache Kafka
 - Apache Flink

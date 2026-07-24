@@ -19,8 +19,8 @@ dependencyResolutionManagement {
 }
 
 include(
-    "common:event-schema",
+    "common",
+    "services:product-catalog-service",
     "services:event-service",
-    "services:query-service",
-    "streaming:ranking-job"
+    "streaming:product-ranking-job"
 )

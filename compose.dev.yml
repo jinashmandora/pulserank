@@ -1,0 +1,333 @@
+name: pulserank
+
+services:
+  postgres:
+    image: postgres:17.6
+    platform: linux/arm64
+    command: [ "postgres", "-c", "wal_level=logical" ]
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - pulserank
+
+  redis:
+    image: redis:8.2
+    platform: linux/arm64
+    ports:
+      - "6379:6379"
+    command:
+      - redis-server
+      - --appendonly
+      - "yes"
+      - --maxmemory
+      - 256mb
+      - --maxmemory-policy
+      - volatile-lru
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - pulserank
+
+  redis-insight:
+    image: redis/redisinsight:3.6
+    platform: linux/arm64
+    ports:
+      - "5540:5540"
+    depends_on:
+      - redis
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    volumes:
+      - redis-insight-data:/data
+    networks:
+      - pulserank
+
+  kafka-init:
+    image: alpine:3.22
+    platform: linux/arm64
+    user: root
+    command: >
+      sh -c "
+        mkdir -p /tmp/kraft-combined-logs &&
+        chown -R 1000:1000 /tmp/kraft-combined-logs
+      "
+    volumes:
+      - kafka-data:/tmp/kraft-combined-logs
+    networks:
+      - pulserank
+
+  kafka:
+    image: apache/kafka:4.1.0
+    platform: linux/arm64
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://:9092,DOCKER://:29092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,DOCKER://kafka:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,DOCKER:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: DOCKER
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
+      CLUSTER_ID: ${KAFKA_CLUSTER_ID}
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_HEAP_OPTS: "-Xms512m -Xmx512m"
+    deploy:
+      resources:
+        limits:
+          memory: 1024M
+    depends_on:
+      kafka-init:
+        condition: service_completed_successfully
+    volumes:
+      - kafka-data:/tmp/kraft-combined-logs
+    healthcheck:
+      test: [ "CMD", "/opt/kafka/bin/kafka-topics.sh", "--bootstrap-server", "localhost:9092", "--list" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - pulserank
+
+  kafka-setup:
+    image: apache/kafka:4.1.0
+    platform: linux/arm64
+    depends_on:
+      kafka:
+        condition: service_healthy
+    command: >
+      bash -c "
+        echo 'Waiting for Kafka to be ready...'
+        /opt/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:29092 --partitions 12 --replication-factor 1 --topic pulserank.catalog.product-interactions.v1
+        /opt/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:29092 --partitions 4 --replication-factor 1 --topic pulserank.catalog.product-changes.v1
+        /opt/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:29092 --partitions 12 --replication-factor 1 --topic pulserank.analytic.product-scores.v1
+        echo 'Successfully created all versioned topics!'
+      "
+    networks:
+      - pulserank
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    platform: linux/arm64
+    depends_on:
+      - kafka
+    ports:
+      - "8080:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: PulseRank
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    networks:
+      - pulserank
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:25.6
+    platform: linux/arm64
+    ports:
+      - "8123:8123"   # HTTP
+      - "9000:9000"   # Native protocol
+    environment:
+      CLICKHOUSE_DB: ${CLICKHOUSE_DB}
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: "1"
+    deploy:
+      resources:
+        limits:
+          memory: 1024M
+    volumes:
+      - clickhouse-data:/var/lib/clickhouse
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "clickhouse-client",
+          "--query",
+          "SELECT 1"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - pulserank
+
+  flink-init:
+    image: alpine:latest
+    platform: linux/arm64
+    user: root
+    command: >
+      sh -c "mkdir -p /opt/flink/state/savepoints /opt/flink/state/checkpoints && 
+      chown -R 9999:9999 /opt/flink/state"
+    volumes:
+      - flink-state:/opt/flink/state
+    networks:
+      - pulserank
+
+  flink-jobmanager:
+    build:
+      context: ./streaming/product-ranking-job
+      dockerfile: Dockerfile
+    image: flink-ranking-job:latest
+    platform: linux/arm64
+    ports:
+      - "8081:8081"
+    command: standalone-job --job-classname com.pulserank.ranking.Application -p 12 ${SAVEPOINT:-}
+    environment:
+      FLINK_PROPERTIES: |
+        jobmanager.rpc.address: flink-jobmanager
+        jobmanager.memory.process.size: 1024m
+        state.backend.type: rocksdb
+        state.backend.rocksdb.memory.managed: true
+        execution.checkpointing.storage: filesystem
+        execution.checkpointing.dir: file:///opt/flink/state/checkpoints
+        execution.checkpointing.savepoint-dir: file:///opt/flink/state/savepoints
+    deploy:
+      resources:
+        limits:
+          memory: 1024M
+    depends_on:
+      flink-init:
+        condition: service_completed_successfully
+      kafka-setup:
+        condition: service_completed_successfully
+    volumes:
+      - flink-state:/opt/flink/state
+    networks:
+      - pulserank
+
+  flink-taskmanager:
+    build:
+      context: ./streaming/product-ranking-job
+      dockerfile: Dockerfile
+    image: flink-ranking-job:latest
+    platform: linux/arm64
+    command: taskmanager
+    environment:
+      FLINK_PROPERTIES: |
+        jobmanager.rpc.address: flink-jobmanager
+        taskmanager.numberOfTaskSlots: 12
+        taskmanager.memory.process.size: 3072m
+        taskmanager.memory.managed.fraction: 0.45
+        state.backend.type: rocksdb
+        state.backend.rocksdb.memory.managed: true
+        execution.checkpointing.storage: filesystem
+        execution.checkpointing.dir: file:///opt/flink/state/checkpoints
+        execution.checkpointing.savepoint-dir: file:///opt/flink/state/savepoints
+    deploy:
+      resources:
+        limits:
+          memory: 3072M # Locked to 3 GB, giving RocksDB ~1.3 GB of off-heap space
+    depends_on:
+      flink-init:
+        condition: service_completed_successfully
+      flink-jobmanager:
+        condition: service_started
+    volumes:
+      - flink-state:/opt/flink/state
+    networks:
+      - pulserank
+
+  apicurio-api:
+    image: apicurio/apicurio-registry:3.2.6
+    platform: linux/arm64
+    ports:
+      - "8084:8080"
+    environment:
+      QUARKUS_DATASOURCE_DB_KIND: postgresql
+      QUARKUS_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      QUARKUS_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      QUARKUS_DATASOURCE_JDBC_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
+      JAVA_OPTS_APPEND: "-Xms256m -Xmx256m"
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - pulserank
+
+  debezium:
+    build:
+      context: ./docker/debezium
+      dockerfile: Dockerfile
+    image: pulserank-debezium-postgres
+    platform: linux/arm64
+    ports:
+      - "8083:8083"
+    environment:
+      BOOTSTRAP_SERVERS: kafka:29092
+      GROUP_ID: 1
+      CONFIG_STORAGE_TOPIC: connect_configs
+      OFFSET_STORAGE_TOPIC: connect_offsets
+      STATUS_STORAGE_TOPIC: connect_statuses
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_KAFKA_CONNECT_PLUGINS_DIR: "/kafka/connect"
+      CONNECT_KEY_CONVERTER: org.apache.kafka.connect.storage.StringConverter
+      CONNECT_VALUE_CONVERTER: org.apache.kafka.connect.converters.ByteArrayConverter
+      JAVA_OPTS: "-Xms256m -Xmx512m -XX:MaxMetaspaceSize=256m"
+    deploy:
+      resources:
+        limits:
+          memory: 1024M
+    depends_on:
+      kafka:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    networks:
+      - pulserank
+
+networks:
+  pulserank:
+    name: pulserank
+
+volumes:
+  postgres-data:
+  kafka-data:
+  clickhouse-data:
+  redis-data:
+  redis-insight-data:
+  flink-state:

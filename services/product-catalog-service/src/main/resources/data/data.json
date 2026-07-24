@@ -1,0 +1,245 @@
+[
+  {
+    "sku": "SM-1004",
+    "name": "OnePlus 14",
+    "description": "Fast Android flagship",
+    "categoryId": 1,
+    "brand": "OnePlus",
+    "price": 899.0,
+    "currency": "USD"
+  },
+  {
+    "sku": "SM-1005",
+    "name": "Nothing Phone 3",
+    "description": "Transparent Android phone",
+    "categoryId": 1,
+    "brand": "Nothing",
+    "price": 699.0,
+    "currency": "USD"
+  },
+  {
+    "sku": "LP-2001",
+    "name": "MacBook Pro M5",
+    "description": "Apple professional laptop",
+    "categoryId": 2,
+    "brand": "Apple",
+    "price": 2499.0,
+    "currency": "USD"
+  },
+  {
+    "sku": "LP-2002",
+    "name": "Dell XPS 15",
+    "description": "Premium Windows laptop",
+    "categoryId": 2,
+    "brand": "Dell",
+    "price": 1899.0,
+    "currency": "USD"
+  },
+  {
+    "sku": "LP-2003",
+    "name": "ThinkPad X1 Carbon",
+    "description": "Business ultrabook",
+    "categoryId": 2,
+    "brand": "Lenovo",
+    "price": 1799.0,
+    "currency": "USD"
+  },
+  {
+    "sku": "LP-2004",
+    "name": "ASUS ROG Zephyrus",
+    "description": "Gaming laptop",
+    "categoryId": 2,
+    "brand": "ASUS",
+    "price": 2299.0,
+    "currency": "USD"
+  },
+  {
+    "sku": "LP-2005",
+    "name": "HP Spectre x360",
+    "description": "Convertible ultrabook",
+    "categoryId": 2,
+    "brand": "HP",
+    "price": 1699.0,
+    "currency": "USD"
+  },
+  {
+    "sku": "AU-3001",
+    "name": "AirPods Pro 3",
+    "description": "Wireless ANC earbuds",
+    "categoryId": 3,
+    "brand": "Apple",
+    "price": 299.0,
+    "currency": "USD"
+  },
+  {
+    "sku": "AU-3002",
+    "name": "Sony WH-1000XM6",
+    "description": "Noise cancelling headphones",
+    "categoryId": 3,
+    "brand": "Sony",
+    "price": 449.0,
+    "currency": "USD"
+  },
+  {
+    "sku": "AU-3003",
+    "name": "Bose QuietComfort Ultra",
+    "description": "Premium headphones",
+    "categoryId": 3,
+    "brand": "Bose",
+    "price": 429.0,
+    "currency": "USD"
+  },
+  {
+    "sku": "AU-3004",
+    "name": "JBL Flip 7",
+    "description": "Portable Bluetooth speaker",
+    "categoryId": 3,
+    "brand": "JBL",
+    "price": 149.0,
+    "currency": "USD"
+  },
+  {
+    "sku": "AU-3005",
+    "name": "Marshall Emberton III",
+    "description": "Portable speaker",
+    "categoryId": 3,
+    "brand": "Marshall",
+    "price": 199.0,
+    "currency": "USD"
+  },
+  {
+    "sku": "GM-4001",
+    "name": "PlayStation 6",
+    "description": "Sony next generation console",
+    "categoryId": 4,
+    "brand": "Sony",
+    "price": 699.0,
+    "currency": "USD"
+  },
+  {
+    "sku": "GM-4002",
+    "name": "Xbox Series X2",
+    "description": "Microsoft gaming console",
+    "categoryId": 4,
+    "brand": "Microsoft",
+    "price": 649.0,
+    "currency": "USD"
+  },
+  {
+    "sku": "GM-4003",
+    "name": "Nintendo Switch 2",
+    "description": "Portable gaming console",
+    "categoryId": 4,
+    "brand": "Nintendo",
+    "price": 499.0,
+    "currency": "USD"
+  },
+  {
+    "sku": "GM-4004",
+    "name": "Steam Deck OLED",
+    "description": "Portable PC gaming",
+    "categoryId": 4,
+    "brand": "Valve",
+    "price": 599.0,
+    "currency": "USD"
+  },
+  {
+    "sku": "GM-4005",
+    "name": "Meta Quest 4",
+    "description": "VR gaming headset",
+    "categoryId": 4,
+    "brand": "Meta",
+    "price": 549.0,
+    "currency": "USD"
+  },
+  {
+    "sku": "SH-5001",
+    "name": "Amazon Echo 6",
+    "description": "Smart speaker",
+    "categoryId": 5,
+    "brand": "Amazon",
+    "price": 149.0,
+    "currency": "USD"
+  },
+  {
+    "sku": "SH-5002",
+    "name": "Google Nest Hub",
+    "description": "Smart display",
+    "categoryId": 5,
+    "brand": "Google",
+    "price": 199.0,
+    "currency": "USD"
+  },
+  {
+    "sku": "SH-5003",
+    "name": "Philips Hue Starter Kit",
+    "description": "Smart lighting",
+    "categoryId": 5,
+    "brand": "Philips",
+    "price": 229.0,
+    "currency": "USD"
+  },
+  {
+    "sku": "SH-5004",
+    "name": "Ring Video Doorbell Pro",
+    "description": "Smart security",
+    "categoryId": 5,
+    "brand": "Ring",
+    "price": 279.0,
+    "currency": "USD"
+  },
+  {
+    "sku": "SH-5005",
+    "name": "Dyson Purifier Cool",
+    "description": "Smart air purifier",
+    "categoryId": 5,
+    "brand": "Dyson",
+    "price": 699.0,
+    "currency": "USD"
+  },
+  {
+    "sku": "WR-6001",
+    "name": "Apple Watch Ultra 3",
+    "description": "Premium smartwatch",
+    "categoryId": 6,
+    "brand": "Apple",
+    "price": 899.0,
+    "currency": "USD"
+  },
+  {
+    "sku": "WR-6002",
+    "name": "Galaxy Watch 8",
+    "description": "Samsung smartwatch",
+    "categoryId": 6,
+    "brand": "Samsung",
+    "price": 499.0,
+    "currency": "USD"
+  },
+  {
+    "sku": "WR-6003",
+    "name": "Garmin Fenix 9",
+    "description": "Outdoor multisport watch",
+    "categoryId": 6,
+    "brand": "Garmin",
+    "price": 999.0,
+    "currency": "USD"
+  },
+  {
+    "sku": "WR-6004",
+    "name": "Fitbit Charge 7",
+    "description": "Fitness tracker",
+    "categoryId": 6,
+    "brand": "Google",
+    "price": 229.0,
+    "currency": "USD"
+  },
+  {
+    "sku": "WR-6005",
+    "name": "Oura Ring 5",
+    "description": "Smart health ring",
+    "categoryId": 6,
+    "brand": "Oura",
+    "price": 399.0,
+    "currency": "USD"
+  }
+]

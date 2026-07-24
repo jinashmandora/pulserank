@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: product-catalog-service
+  threads:
+    virtual:
+      enabled: true
+  datasource:
+    url: jdbc:postgresql://localhost:5432/pulserank
+    username: pulserank
+    password: pulserank
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+server:
+  port: 8085

@@ -1,6 +1,9 @@
 spring:
   application:
     name: event-service
+  threads:
+    virtual:
+      enabled: true
   kafka:
     bootstrap-servers: localhost:9092
     producer:
@@ -9,6 +12,10 @@ spring:
     properties:
       apicurio.registry.url: http://localhost:8084/apis/registry/v3
       apicurio.registry.auto-register: true
+  data:
+    redis:
+      host: localhost
+      port: 6379
 
 server:
   port: 8082
