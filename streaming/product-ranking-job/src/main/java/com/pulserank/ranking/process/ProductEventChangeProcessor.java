@@ -97,7 +97,7 @@ public class ProductEventChangeProcessor extends KeyedCoProcessFunction<
         long productId = ctx.getCurrentKey();
         switch (value.getOperation()) {
             case UPSERT -> {
-                LOG.debug("Catalog UPSERT received for Product: {}", productId);
+                LOG.info("Catalog UPSERT received for Product: {}", productId);
                 productDetailsState.update(value.getProductDetails());
             }
             case DELETE -> {
@@ -120,8 +120,6 @@ public class ProductEventChangeProcessor extends KeyedCoProcessFunction<
 
         ProductDetails productDetails = productDetailsState.value();
         long productId = ctx.getCurrentKey();
-
-        LOG.info("Timer fired for Product: {} with score {}", productId, score());
 
         if (productDetails != null) {
             long keyToRemove = timestamp - WINDOW_DURATION;
