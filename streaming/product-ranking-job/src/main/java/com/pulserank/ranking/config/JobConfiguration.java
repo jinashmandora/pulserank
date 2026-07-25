@@ -20,7 +20,8 @@ public final class JobConfiguration {
     public static Map<String, Object> apicurioConfig() {
         return Map.of(
                 "apicurio.registry.url", KafkaConfiguration.APICURIO_REGISTRY_URL,
-                "apicurio.registry.use-specific-avro-reader", true
+                "apicurio.registry.use-specific-avro-reader", true,
+                "apicurio.registry.auto-register", true
         );
     }
 }

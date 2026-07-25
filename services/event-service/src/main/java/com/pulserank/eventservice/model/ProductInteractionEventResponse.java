@@ -2,7 +2,7 @@ package com.pulserank.eventservice.model;
 
 import java.util.UUID;
 
-public record PublishEventResponse(
+public record ProductInteractionEventResponse(
         UUID eventId
 ) {
 }

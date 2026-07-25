@@ -14,6 +14,8 @@ import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.formats.avro.typeutils.AvroTypeInfo;
 import org.apache.flink.streaming.api.functions.co.KeyedCoProcessFunction;
 import org.apache.flink.util.Collector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -23,6 +25,8 @@ public class ProductEventChangeProcessor extends KeyedCoProcessFunction<
         ProductIntersectionEvent,
         ProductChangeEvent,
         ProductScoreEvent> {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ProductEventChangeProcessor.class);
 
     private static final long WINDOW_DURATION = Duration
             .ofMinutes(30)
@@ -35,7 +39,8 @@ public class ProductEventChangeProcessor extends KeyedCoProcessFunction<
 
 
     @Override
-    public void open(OpenContext openContext) throws Exception {
+    public void open(OpenContext openContext) {
+        LOG.info("Initializing ProductEventChangeProcessor for subtask...");
 
         ValueStateDescriptor<Integer> scoreDescriptor =
                 new ValueStateDescriptor<>(
@@ -89,10 +94,14 @@ public class ProductEventChangeProcessor extends KeyedCoProcessFunction<
                                         ProductChangeEvent,
                                         ProductScoreEvent>.Context ctx,
                                 Collector<ProductScoreEvent> out) throws Exception {
-
+        long productId = ctx.getCurrentKey();
         switch (value.getOperation()) {
-            case UPSERT -> productDetailsState.update(value.getProductDetails());
+            case UPSERT -> {
+                LOG.info("Catalog UPSERT received for Product: {}", productId);
+                productDetailsState.update(value.getProductDetails());
+            }
             case DELETE -> {
+                LOG.info("Catalog DELETE received for Product: {}. Clearing all state.", productId);
                 productDetailsState.clear();
                 scoreState.clear();
                 windowExpiryState.clear();
@@ -110,6 +119,7 @@ public class ProductEventChangeProcessor extends KeyedCoProcessFunction<
                         Collector<ProductScoreEvent> out) throws Exception {
 
         ProductDetails productDetails = productDetailsState.value();
+        long productId = ctx.getCurrentKey();
 
         if (productDetails != null) {
             long keyToRemove = timestamp - WINDOW_DURATION;
@@ -129,7 +139,6 @@ public class ProductEventChangeProcessor extends KeyedCoProcessFunction<
                 }
             }
 
-            long productId = ctx.getCurrentKey();
             out.collect(ProductScoreEvent.newBuilder()
                     .setEventId(productId + "-" + timestamp)
                     .setProductId(productId)
@@ -137,6 +146,9 @@ public class ProductEventChangeProcessor extends KeyedCoProcessFunction<
                     .setEventTime(Instant.ofEpochMilli(timestamp))
                     .setProductDetails(productDetails)
                     .build());
+        } else {
+            LOG.warn("Timer fired for Product: {} with score {}, but NO catalog details exist. " +
+                    "Interactions arrived before catalog sync. Skipping emission.", productId, score());
         }
     }
 

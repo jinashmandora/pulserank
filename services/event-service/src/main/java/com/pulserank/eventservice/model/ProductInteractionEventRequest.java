@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotNull;
 
 import java.util.UUID;
 
-public record PublishEventRequest(
+public record ProductInteractionEventRequest(
         @NotNull
         UUID userId,
 

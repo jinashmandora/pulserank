@@ -19,21 +19,28 @@ public class ProductScoreJob {
 
     public void execute(StreamExecutionEnvironment environment) {
 
-        WatermarkStrategy<ProductIntersectionEvent> watermarkStrategy = WatermarkStrategy
+        WatermarkStrategy<ProductIntersectionEvent> productIntersectionEventWatermarkStrategy = WatermarkStrategy
                 .<ProductIntersectionEvent>forBoundedOutOfOrderness(Duration.ofMinutes(1))
                 .withTimestampAssigner((event, timestamp) ->
-                        event.getEventTime().toEpochMilli());
+                        event.getEventTime().toEpochMilli())
+                .withIdleness(Duration.ofMinutes(1));
+
+        WatermarkStrategy<ProductChangeEvent> productChangeEventWatermarkStrategy = WatermarkStrategy
+                .<ProductChangeEvent>forBoundedOutOfOrderness(Duration.ofSeconds(5))
+                .withTimestampAssigner((element, recordTimestamp) ->
+                        element.getEventTime().toEpochMilli())
+                .withIdleness(Duration.ofMinutes(1));
 
 
         DataStream<ProductIntersectionEvent> productInteractions = environment.fromSource(
                 KafkaSourceFactory.productIntersections(),
-                watermarkStrategy,
+                productIntersectionEventWatermarkStrategy,
                 "source-product-interactions"
         ).uid("source-product-interactions");
 
         DataStream<ProductChangeEvent> productChangeEvents = environment.fromSource(
                 KafkaSourceFactory.productChanges(),
-                WatermarkStrategy.noWatermarks(),
+                productChangeEventWatermarkStrategy,
                 "source-product-changes"
         ).uid("source-product-changes");
 
